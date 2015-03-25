@@ -31,19 +31,85 @@ void UpdateProjection()
 	glMatrixMode(GL_MODELVIEW);
 }
 
-int m = 3;
-int l = 5;
-int Semples = 2;
 
-Vertex VertexAt(int i, int j, int l, int m)
+
+
+double Test(double theta, double phi)
 {
-	static auto PI = 3.14159265;
+	return max(0.0f, 5.0f * cosf(theta) - 4.0f) + max(0.0f, -4.0f * sinf(theta - PI) * cosf(phi - 2.5f) - 3.0f);
+}
 
-	float theta = (float)j rad;
-	float phi = (float)i rad;
-	float r = abs(evaluateSH(l, m, theta, phi ));
+
+const int SqrtSHCoefCount = 2;
+const int SqrtSamplesCount = 100;
+const int SamplesCount = SqrtSamplesCount * SqrtSamplesCount;
+const int SHCoefCount = SqrtSHCoefCount * SqrtSHCoefCount;
+
+SHSample Samples[SamplesCount];
+double SHCoef[SHCoefCount];
+
+void CalcCoeficents()
+{
+	sphericalStratifiedSampling(Samples, SqrtSamplesCount, SqrtSHCoefCount);
+	SHProjectSphericalFunction(&Test, Samples, SHCoef, SamplesCount, SHCoefCount);
+}
+
+double Approxim(double theta, double phi)
+{
+	double Result = 0;
+	int k = 0;
+	for (int l = 0; k < SqrtSHCoefCount; l++)
+		for (int m = -l; m <= l && k < SqrtSHCoefCount; m++)
+		{
+			Result += SHCoef[k] * evaluateSH(l, m, theta, phi);
+			k++;
+		}
+
+	return Result;
+}
+
+
+
+int Semples = 10;
+
+Vertex VertexAt(int i, int j)
+{
+	int m = 0;
+	int l = 2;
+
+	float theta = (float)i rad;
+	float phi = (float)j rad;
+
+	float r = 0;
+	//if (l == 1 && m == 0)
+	//	r = sqrt(3.0f / (PI * 4.0f)) * cosf(theta);
+	r = FevaluateSH(l, m, theta, phi);
+	//r = Test(theta, phi);
+	//r = Approxim(theta, phi) * 2;
+	r = abs(r);
+	//r = 1;
 
 	return 
+	{
+		r * sinf(theta) * cosf(phi),
+		r * sinf(theta) * sinf(phi),
+		r * cosf(theta),
+	};
+}
+
+Vertex VertexAt2(int i, int j)
+{
+	int m = 0;
+	int l = 2;
+
+	float theta = (float)i rad;
+	float phi = (float)j rad;
+
+	float r = Test(theta, phi);
+	r = evaluateSH(l, m, theta, phi);
+	r = abs(r);
+
+	return
 	{
 		r * sinf(theta) * cosf(phi),
 		r * sinf(theta) * sinf(phi),
@@ -80,18 +146,31 @@ void InitUpdate(Render& _Render)
 	{
 		if (!Mesh.ReadyToUse())
 		{
+			CalcCoeficents();
 			vector<Vertex> Lines;
 
 			if (true)
 			{
-				for (int i = -180; i < 180; i += Semples)
-					for (int j = -180; j < 180; j += Semples)
+				//if(false)
+				for (int i = 0; i < 360; i += Semples)
+					for (int j = 0; j < 360; j += Semples)
 					{
-						Lines.push_back(VertexAt(i,				j, l, m));
-						Lines.push_back(VertexAt(i + Semples,	j, l, m));
-						Lines.push_back(VertexAt(i,				j, l, m));
-						Lines.push_back(VertexAt(i,	  j + Semples, l, m));
-					}
+						Lines.push_back(VertexAt(i,				j));
+						Lines.push_back(VertexAt(i + Semples,	j));
+						Lines.push_back(VertexAt(i,				j));
+						Lines.push_back(VertexAt(i,	  j + Semples));
+					}/**/
+
+				//if (false)
+				for (int i = 0; i < 360; i += Semples)
+					for (int j = 0; j < 360; j += Semples)
+					{
+						Lines.push_back(VertexAt2(i, j));
+						Lines.push_back(VertexAt2(i + Semples, j));
+						Lines.push_back(VertexAt2(i, j));
+						Lines.push_back(VertexAt2(i, j + Semples));
+					}/**/
+
 			}
 
 
@@ -105,7 +184,6 @@ void InitUpdate(Render& _Render)
 				AddPoints(Lines, 2, 0);
 				AddPoints(Lines, 2, 1);
 				AddPoints(Lines, 2, 2);
-				
 			}
 
 
