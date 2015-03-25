@@ -73,14 +73,7 @@ double evaluateK(int l, int m)
 
 static auto PI = 3.14159265;
 
-std::function<double(double, double)> SphereFunctions[] =
-{
-	[](double theta, double phi){return sqrt(1.0f / (4.0f * PI)); }, // Y l0 m0
-	[](double theta, double phi){return sqrt(3.0f / (4.0f * PI)) * sin(phi) * sin(theta); }, // Y l1 m-1
-	[](double theta, double phi){return sqrt(3.0f / (4.0f * PI)) * cos(theta); }, // Y l1 m-1
-	[](double theta, double phi){return sqrt(3.0f / (4.0f * PI)) * cos(phi) * sin(theta); }, // Y l1 m1
-};
-const int SF_Count = sizeof(SphereFunctions) / sizeof(std::function<double(double, double)>);
+
 
 
 double evaluateSH(int l, int m, double theta, double phi)
@@ -102,6 +95,14 @@ double evaluateSH(int l, int m, double theta, double phi)
 	return SH;
 }
 
+std::function<double(double, double)> SphereFunctions[] =
+{
+	[](double theta, double phi){return sqrt(1.0f / (4.0f * PI)); }, // Y l0 m0
+	[](double theta, double phi){return sqrt(3.0f / (4.0f * PI)) * sin(phi) * abs(sin(theta)); }, // Y l1 m1
+	[](double theta, double phi){return sqrt(3.0f / (4.0f * PI)) * cos(theta); }, // Y l1 m-1
+	[](double theta, double phi){return sqrt(3.0f / (4.0f * PI)) * cos(phi) * abs(sin(theta)); }, // Y l1 m-1
+};
+const int SF_Count = sizeof(SphereFunctions) / sizeof(std::function<double(double, double)>);
 double FevaluateSH(int l, int m, double theta, double phi)
 {
 	auto ind = l * (l + 1) + m;
@@ -161,7 +162,7 @@ void sphericalStratifiedSampling(SHSample *_samples, int _sqrt_samples_count, in
 				for (int m = -l; m <= l; ++m)
 				{
 					int index = l * (l + 1) + m;
-					_samples[i].coeff[index] = evaluateSH(l, m, theta, phi);
+					_samples[i].coeff[index] = FevaluateSH(l, m, theta, phi);
 				}
 			}
 			++i;

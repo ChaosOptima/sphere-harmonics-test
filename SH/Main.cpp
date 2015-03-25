@@ -36,11 +36,12 @@ void UpdateProjection()
 
 double Test(double theta, double phi)
 {
+	//return evaluateSH(5, 3, theta, phi);
 	return max(0.0f, 5.0f * cosf(theta) - 4.0f) + max(0.0f, -4.0f * sinf(theta - PI) * cosf(phi - 2.5f) - 3.0f);
 }
 
 
-const int SqrtSHCoefCount = 2;
+const int SqrtSHCoefCount = 4;
 const int SqrtSamplesCount = 100;
 const int SamplesCount = SqrtSamplesCount * SqrtSamplesCount;
 const int SHCoefCount = SqrtSHCoefCount * SqrtSHCoefCount;
@@ -61,7 +62,7 @@ double Approxim(double theta, double phi)
 	for (int l = 0; k < SqrtSHCoefCount; l++)
 		for (int m = -l; m <= l && k < SqrtSHCoefCount; m++)
 		{
-			Result += SHCoef[k] * evaluateSH(l, m, theta, phi);
+			Result += SHCoef[k] * FevaluateSH(l, m, theta, phi);
 			k++;
 		}
 
@@ -83,9 +84,9 @@ Vertex VertexAt(int i, int j)
 	float r = 0;
 	//if (l == 1 && m == 0)
 	//	r = sqrt(3.0f / (PI * 4.0f)) * cosf(theta);
-	r = FevaluateSH(l, m, theta, phi);
+	//r = FevaluateSH(l, m, theta, phi);
 	//r = Test(theta, phi);
-	//r = Approxim(theta, phi) * 2;
+	r = Approxim(theta, phi) * 2;
 	r = abs(r);
 	//r = 1;
 
@@ -106,7 +107,7 @@ Vertex VertexAt2(int i, int j)
 	float phi = (float)j rad;
 
 	float r = Test(theta, phi);
-	r = evaluateSH(l, m, theta, phi);
+	//r = evaluateSH(l, m, theta, phi);
 	r = abs(r);
 
 	return
