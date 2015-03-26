@@ -31,7 +31,7 @@ void UpdateProjection()
 	glMatrixMode(GL_MODELVIEW);
 }
 
-int m = 3;
+int m = 4;
 int l = 5;
 int Semples = 2;
 
