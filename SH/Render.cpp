@@ -75,7 +75,7 @@ void Render::Update()
 
 void Render::Draw()
 {
-	glClearColor(0.3, 0.7, 1, 1);
+	glClearColor(0.4, 0.7, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if(OnDraw)
